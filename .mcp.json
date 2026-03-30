@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hh": {
+      "command": "npx",
+      "args": ["-y", "@theyahia/hh-mcp"]
+    }
+  }
+}
