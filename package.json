@@ -1,7 +1,7 @@
 {
   "name": "@theyahia/hh-mcp",
-  "version": "1.0.0",
-  "description": "MCP server for hh.ru jobs API — vacancy search, salary stats, employers, regions. Public endpoints, no auth required.",
+  "version": "1.1.0",
+  "description": "MCP-сервер для hh.ru: поиск вакансий, резюме, зарплаты, работодатели, справочники. 8 инструментов.",
   "type": "module",
   "main": "dist/index.js",
   "bin": { "hh-mcp": "dist/index.js" },
@@ -11,7 +11,9 @@
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
-    "prepublishOnly": "npm run build"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
@@ -20,7 +22,8 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
   },
   "publishConfig": { "access": "public" },
   "mcpName": "io.github.theYahia/hh-mcp",
