@@ -3,76 +3,192 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { searchVacanciesSchema, handleSearchVacancies, getVacancySchema, handleGetVacancy } from "./tools/vacancies.js";
-import { getEmployersSchema, handleGetEmployers } from "./tools/employers.js";
-import { handleGetAreas, handleGetProfessionalRoles, getSalaryStatsSchema, handleGetSalaryStats } from "./tools/references.js";
-import { searchResumesSchema, handleSearchResumes, getResumeSchema, handleGetResume } from "./tools/resumes.js";
+import {
+  searchVacanciesSchema,
+  handleSearchVacancies,
+  getVacancySchema,
+  handleGetVacancy,
+  getSimilarVacanciesSchema,
+  handleGetSimilarVacancies,
+} from "./tools/vacancies.js";
+import {
+  searchEmployersSchema,
+  handleSearchEmployers,
+  getEmployerSchema,
+  handleGetEmployer,
+  getEmployerVacanciesSchema,
+  handleGetEmployerVacancies,
+} from "./tools/employers.js";
+import {
+  searchResumesSchema,
+  handleSearchResumes,
+  getResumeSchema,
+  handleGetResume,
+} from "./tools/resumes.js";
+import {
+  handleGetAreas,
+  handleGetProfessionalRoles,
+  handleGetDictionaries,
+  suggestPositionsSchema,
+  handleSuggestPositions,
+  suggestCompaniesSchema,
+  handleSuggestCompanies,
+  suggestAreasSchema,
+  handleSuggestAreas,
+} from "./tools/references.js";
+import {
+  getSalaryStatisticsSchema,
+  handleGetSalaryStatistics,
+} from "./tools/salary.js";
+import { HhApiError } from "./client.js";
 import http from "node:http";
 
-function createServer(): McpServer {
+const TOOL_COUNT = 16;
+
+function wrapHandler(
+  fn: (params: any) => Promise<string>,
+): (params: any) => Promise<{ content: { type: "text"; text: string }[] }> {
+  return async (params) => {
+    try {
+      const text = await fn(params);
+      return { content: [{ type: "text" as const, text }] };
+    } catch (error) {
+      const message =
+        error instanceof HhApiError
+          ? `Error ${error.status}: ${error.message}${error.body ? `\n${error.body}` : ""}`
+          : error instanceof Error
+            ? error.message
+            : String(error);
+      return { content: [{ type: "text" as const, text: `ERROR: ${message}` }] };
+    }
+  };
+}
+
+export function createServer(): McpServer {
   const server = new McpServer({
     name: "hh-mcp",
-    version: "1.1.0",
+    version: "2.0.0",
   });
+
+  // --- Vacancies (3) ---
 
   server.tool(
     "search_vacancies",
-    "Поиск вакансий на hh.ru по ключевым словам, региону, зарплате, опыту.",
+    "Search job vacancies on hh.ru by keywords, region, salary, experience, employment type, schedule. Returns paginated list with title, salary, employer, snippet.",
     searchVacanciesSchema.shape,
-    async (params) => ({ content: [{ type: "text", text: await handleSearchVacancies(params) }] }),
+    wrapHandler(handleSearchVacancies),
   );
 
   server.tool(
     "get_vacancy",
-    "Полная информация о вакансии: описание, требования, навыки, контакты.",
+    "Get full vacancy details: description, requirements, key skills, contacts, employer info.",
     getVacancySchema.shape,
-    async (params) => ({ content: [{ type: "text", text: await handleGetVacancy(params) }] }),
+    wrapHandler(handleGetVacancy),
   );
 
   server.tool(
+    "get_similar_vacancies",
+    "Find vacancies similar to a given one. Useful for expanding a candidate's job search.",
+    getSimilarVacanciesSchema.shape,
+    wrapHandler(handleGetSimilarVacancies),
+  );
+
+  // --- Resumes (2) — require employer token ---
+
+  server.tool(
     "search_resumes",
-    "Поиск резюме на hh.ru (требуется HH_ACCESS_TOKEN).",
+    "Search candidate resumes by keywords, region, professional role, salary, experience. Requires employer OAuth token (HH_ACCESS_TOKEN).",
     searchResumesSchema.shape,
-    async (params) => ({ content: [{ type: "text", text: await handleSearchResumes(params) }] }),
+    wrapHandler(handleSearchResumes),
   );
 
   server.tool(
     "get_resume",
-    "Полная информация о резюме (требуется HH_ACCESS_TOKEN).",
+    "Get full resume details: experience, education, skills, contacts. Requires employer OAuth token (HH_ACCESS_TOKEN).",
     getResumeSchema.shape,
-    async (params) => ({ content: [{ type: "text", text: await handleGetResume(params) }] }),
+    wrapHandler(handleGetResume),
+  );
+
+  // --- Employers (3) ---
+
+  server.tool(
+    "search_employers",
+    "Search companies/employers on hh.ru by name. Returns company info and open vacancy count.",
+    searchEmployersSchema.shape,
+    wrapHandler(handleSearchEmployers),
   );
 
   server.tool(
-    "get_employers",
-    "Поиск работодателей по названию.",
-    getEmployersSchema.shape,
-    async (params) => ({ content: [{ type: "text", text: await handleGetEmployers(params) }] }),
+    "get_employer",
+    "Get detailed employer profile: description, industries, website, vacancy count.",
+    getEmployerSchema.shape,
+    wrapHandler(handleGetEmployer),
   );
 
   server.tool(
-    "get_salary_stats",
-    "Статистика зарплат по специальности и региону.",
-    getSalaryStatsSchema.shape,
-    async (params) => ({ content: [{ type: "text", text: await handleGetSalaryStats(params) }] }),
+    "get_employer_vacancies",
+    "List active vacancies for a specific employer.",
+    getEmployerVacanciesSchema.shape,
+    wrapHandler(handleGetEmployerVacancies),
   );
+
+  // --- Dictionaries & Suggests (6) ---
 
   server.tool(
     "get_areas",
-    "Справочник регионов РФ и СНГ с кодами для поиска.",
+    "Get the full tree of regions and cities with their codes. Use to find area IDs for search filters.",
     {},
-    async () => ({ content: [{ type: "text", text: await handleGetAreas() }] }),
+    wrapHandler(handleGetAreas),
   );
 
   server.tool(
     "get_professional_roles",
-    "Справочник профессиональных ролей для поиска вакансий.",
+    "Get the full tree of professional roles with IDs. Use to find role IDs for resume search and salary stats.",
     {},
-    async () => ({ content: [{ type: "text", text: await handleGetProfessionalRoles() }] }),
+    wrapHandler(handleGetProfessionalRoles),
+  );
+
+  server.tool(
+    "get_dictionaries",
+    "Get all reference dictionaries: currencies, employment types, schedules, experience levels, vacancy types, and more.",
+    {},
+    wrapHandler(handleGetDictionaries),
+  );
+
+  server.tool(
+    "suggest_positions",
+    "Autocomplete job titles / professional roles. Returns matching role suggestions for partial input.",
+    suggestPositionsSchema.shape,
+    wrapHandler(handleSuggestPositions),
+  );
+
+  server.tool(
+    "suggest_companies",
+    "Autocomplete company names. Returns matching employer suggestions for partial input.",
+    suggestCompaniesSchema.shape,
+    wrapHandler(handleSuggestCompanies),
+  );
+
+  server.tool(
+    "suggest_areas",
+    "Autocomplete region/city names. Returns matching area suggestions for partial input.",
+    suggestAreasSchema.shape,
+    wrapHandler(handleSuggestAreas),
+  );
+
+  // --- Salary (1) ---
+
+  server.tool(
+    "get_salary_statistics",
+    "Get salary statistics for a professional role in a region. Returns vacancy count and salary distribution data.",
+    getSalaryStatisticsSchema.shape,
+    wrapHandler(handleGetSalaryStatistics),
   );
 
   return server;
 }
+
+// --- Start ---
 
 async function main() {
   const args = process.argv.slice(2);
@@ -81,7 +197,9 @@ async function main() {
 
   if (httpMode) {
     const server = createServer();
-    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: () => crypto.randomUUID() });
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: () => crypto.randomUUID(),
+    });
     await server.connect(transport);
 
     const httpServer = http.createServer(async (req, res) => {
@@ -89,7 +207,7 @@ async function main() {
 
       if (url.pathname === "/health") {
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ status: "ok", tools: 8 }));
+        res.end(JSON.stringify({ status: "ok", tools: TOOL_COUNT }));
         return;
       }
 
@@ -99,7 +217,9 @@ async function main() {
       }
 
       res.writeHead(404);
-      res.end("Not found. Use /mcp for MCP protocol or /health for health check.");
+      res.end(
+        "Not found. Use /mcp for MCP protocol or /health for health check.",
+      );
     });
 
     httpServer.listen(port, () => {
@@ -109,13 +229,13 @@ async function main() {
     const server = createServer();
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error("[hh-mcp] Сервер запущен (stdio). 8 инструментов.");
+    console.error(
+      `[hh-mcp] Server started (stdio). ${TOOL_COUNT} tools. Auth: ${process.env.HH_ACCESS_TOKEN ? "token set" : "no token (public endpoints only)"}`,
+    );
   }
 }
 
-export { createServer };
-
 main().catch((error) => {
-  console.error("[hh-mcp] Ошибка:", error);
+  console.error("[hh-mcp] Fatal error:", error);
   process.exit(1);
 });

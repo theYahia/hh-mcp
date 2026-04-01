@@ -15,7 +15,11 @@ export interface Vacancy {
 export interface VacancyDetail extends Vacancy {
   description: string;
   key_skills: { name: string }[];
-  contacts?: { name?: string; email?: string; phones?: { number: string }[] };
+  contacts?: {
+    name?: string;
+    email?: string;
+    phones?: { number: string }[];
+  };
 }
 
 export interface Employer {
@@ -25,6 +29,32 @@ export interface Employer {
   alternate_url: string;
   open_vacancies: number;
   area?: { id: string; name: string };
+  description?: string;
+  site_url?: string;
+  industries?: { id: string; name: string }[];
+}
+
+export interface Resume {
+  id: string;
+  title: string;
+  url: string;
+  alternate_url: string;
+  area?: { id: string; name: string };
+  salary?: { amount: number; currency: string };
+  age?: number;
+  gender?: { id: string; name: string };
+  experience?: {
+    company?: string;
+    position?: string;
+    start: string;
+    end?: string;
+  }[];
+  total_experience?: { months: number };
+  education?: {
+    level?: { id: string; name: string };
+    primary?: { name: string; year: number; organization: string }[];
+  };
+  skill_set?: string[];
 }
 
 export interface Area {
@@ -45,4 +75,9 @@ export interface SearchResult<T> {
   pages: number;
   per_page: number;
   page: number;
+}
+
+export interface SuggestItem {
+  id: string;
+  text: string;
 }

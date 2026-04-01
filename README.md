@@ -1,23 +1,23 @@
 # @theyahia/hh-mcp
 
-MCP-сервер для hh.ru: поиск вакансий, резюме, зарплаты, работодатели, справочники. **8 инструментов.**
+MCP server for the [hh.ru](https://hh.ru) API — Russia and CIS job market. **16 tools** covering vacancies, resumes, employers, salary statistics, dictionaries, and autocomplete.
 
 [![npm](https://img.shields.io/npm/v/@theyahia/hh-mcp)](https://www.npmjs.com/package/@theyahia/hh-mcp)
 [![CI](https://github.com/theYahia/hh-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/theYahia/hh-mcp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Часть серии [Russian API MCP](https://github.com/theYahia/russian-mcp) (50 серверов) by [@theYahia](https://github.com/theYahia).
+Part of the [Russian API MCP](https://github.com/theYahia/russian-mcp) series by [@theYahia](https://github.com/theYahia).
 
-## Два режима работы
+## Two Modes
 
-| Режим | Что доступно | Нужен токен? |
-|-------|-------------|--------------|
-| **Без токена** | Поиск вакансий, вакансия по ID, работодатели, зарплаты, регионы, профроли | Нет |
-| **С токеном** | Всё выше + поиск резюме, резюме по ID | Да (`HH_ACCESS_TOKEN`) |
+| Mode | What's available | Token needed? |
+|------|-----------------|:-------------:|
+| **No token** | Vacancy search, vacancy by ID, similar vacancies, employers, salary stats, areas, roles, dictionaries, suggests | No |
+| **With token** | Everything above + resume search, resume by ID | Yes (`HH_ACCESS_TOKEN`) |
 
-Получить токен: [dev.hh.ru/admin](https://dev.hh.ru/admin)
+Get a token at [dev.hh.ru/admin](https://dev.hh.ru/admin).
 
-## Установка
+## Installation
 
 ### Claude Desktop
 
@@ -28,7 +28,7 @@ MCP-сервер для hh.ru: поиск вакансий, резюме, зар
       "command": "npx",
       "args": ["-y", "@theyahia/hh-mcp"],
       "env": {
-        "HH_ACCESS_TOKEN": "your-token-here (опционально)"
+        "HH_ACCESS_TOKEN": "optional-oauth-token"
       }
     }
   }
@@ -39,63 +39,115 @@ MCP-сервер для hh.ru: поиск вакансий, резюме, зар
 
 ```bash
 claude mcp add hh -- npx -y @theyahia/hh-mcp
-# С токеном:
+# With token:
 claude mcp add hh -e HH_ACCESS_TOKEN=your-token -- npx -y @theyahia/hh-mcp
 ```
 
 ### VS Code / Cursor
 
 ```json
-{ "servers": { "hh": { "command": "npx", "args": ["-y", "@theyahia/hh-mcp"] } } }
+{
+  "servers": {
+    "hh": {
+      "command": "npx",
+      "args": ["-y", "@theyahia/hh-mcp"]
+    }
+  }
+}
 ```
 
 ### Windsurf
 
 ```json
-{ "mcpServers": { "hh": { "command": "npx", "args": ["-y", "@theyahia/hh-mcp"] } } }
+{
+  "mcpServers": {
+    "hh": {
+      "command": "npx",
+      "args": ["-y", "@theyahia/hh-mcp"]
+    }
+  }
+}
 ```
 
-### HTTP режим (Streamable HTTP)
+### HTTP Mode (Streamable HTTP)
 
 ```bash
 npx @theyahia/hh-mcp --http
-# или
+# or
 HTTP_PORT=8080 npx @theyahia/hh-mcp --http
 ```
 
-Эндпоинт: `http://localhost:3000/mcp`
+Endpoint: `http://localhost:3000/mcp`
 Health check: `http://localhost:3000/health`
 
-## Инструменты (8)
+## Environment Variables
 
-| Инструмент | Описание | Нужен токен? |
-|------------|----------|:------------:|
-| `search_vacancies` | Поиск вакансий по словам, региону, зарплате, опыту | Нет |
-| `get_vacancy` | Полная информация о вакансии с описанием и контактами | Нет |
-| `search_resumes` | Поиск резюме по ключевым словам и параметрам | **Да** |
-| `get_resume` | Полная информация о резюме | **Да** |
-| `get_employers` | Поиск работодателей по названию | Нет |
-| `get_salary_stats` | Статистика зарплат по специальности и региону | Нет |
-| `get_areas` | Справочник регионов РФ и СНГ с кодами | Нет |
-| `get_professional_roles` | Справочник профессиональных ролей | Нет |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `HH_ACCESS_TOKEN` | No | OAuth 2.0 Bearer token. Required for resume endpoints. |
+| `HTTP_PORT` | No | Port for HTTP mode (default: 3000). |
 
-## Примеры
+## Tools (16)
+
+### Vacancies
+
+| Tool | Description | Token? |
+|------|-------------|:------:|
+| `search_vacancies` | Search vacancies by keywords, region, salary, experience, employment type, schedule, with sorting and pagination | No |
+| `get_vacancy` | Full vacancy details: description, requirements, key skills, contacts | No |
+| `get_similar_vacancies` | Find vacancies similar to a given one | No |
+
+### Resumes
+
+| Tool | Description | Token? |
+|------|-------------|:------:|
+| `search_resumes` | Search candidate resumes by keywords, region, role, salary, experience | **Yes** |
+| `get_resume` | Full resume: experience, education, skills, contacts | **Yes** |
+
+### Employers
+
+| Tool | Description | Token? |
+|------|-------------|:------:|
+| `search_employers` | Search companies by name and region | No |
+| `get_employer` | Employer profile: description, industries, website, vacancy count | No |
+| `get_employer_vacancies` | List active vacancies for a specific employer | No |
+
+### Dictionaries & Suggests
+
+| Tool | Description | Token? |
+|------|-------------|:------:|
+| `get_areas` | Full tree of regions and cities with codes | No |
+| `get_professional_roles` | Full tree of professional roles with IDs | No |
+| `get_dictionaries` | All reference data: currencies, employment types, schedules, experience levels | No |
+| `suggest_positions` | Autocomplete job titles | No |
+| `suggest_companies` | Autocomplete company names | No |
+| `suggest_areas` | Autocomplete region/city names | No |
+
+### Salary
+
+| Tool | Description | Token? |
+|------|-------------|:------:|
+| `get_salary_statistics` | Salary distribution for a professional role in a region | No |
+
+## Rate Limiting
+
+Built-in rate limiter respects the hh.ru API limit of 5 requests per second. Automatic retry with exponential backoff on 429 and 5xx errors (up to 3 attempts).
+
+## Demo Prompts
 
 ```
-Найди вакансии Python в Москве от 200К
-Покажи вакансии в Яндексе
-Средняя зарплата Senior Backend?
-Какие регионы есть в hh.ru?
-Найди резюме Java-разработчиков в Петербурге
+Find remote Python developer jobs in Moscow paying over 300,000 RUB
 ```
 
-## API
+```
+Show me all open vacancies at Yandex and give me salary statistics for their top roles
+```
 
-Все публичные эндпоинты используют `https://api.hh.ru` без авторизации. Эндпоинты резюме требуют OAuth 2.0 токен через переменную окружения `HH_ACCESS_TOKEN`.
+```
+Compare Senior Backend salaries in Moscow vs Saint Petersburg, and suggest similar vacancies to the best-paying one
+```
 
-User-Agent: `theYahia-hh-mcp/1.0`
-
-## Разработка
+## Development
 
 ```bash
 git clone https://github.com/theYahia/hh-mcp.git
@@ -105,10 +157,11 @@ npm run build
 npm test
 ```
 
-## Часть серии Russian API MCP
+## API Reference
 
-**50 серверов:** [github.com/theYahia/russian-mcp](https://github.com/theYahia/russian-mcp)
+- [hh.ru API docs](https://api.hh.ru/)
+- [hh.ru API GitHub](https://github.com/hhru/api)
 
-## Лицензия
+## License
 
 MIT
