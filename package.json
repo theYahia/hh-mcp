@@ -1,12 +1,18 @@
 {
   "name": "@theyahia/hh-mcp",
-  "version": "2.0.0",
-  "description": "MCP server for hh.ru API — 16 tools: vacancy search, resumes, employers, salary stats, dictionaries, autocomplete. OAuth 2.0 support.",
+  "version": "2.0.1",
+  "description": "MCP server for HeadHunter — vacancy search, resumes, salary stats (Russia)",
   "type": "module",
   "main": "dist/index.js",
-  "bin": { "hh-mcp": "dist/index.js" },
-  "files": ["dist"],
-  "engines": { "node": ">=18.0.0" },
+  "bin": {
+    "hh-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
@@ -25,7 +31,9 @@
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   },
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "mcpName": "io.github.theYahia/hh-mcp",
   "keywords": [
     "mcp",
@@ -40,10 +48,16 @@
     "vacancies",
     "salary",
     "resume",
-    "employers"
+    "employers",
+    "api",
+    "typescript",
+    "hr"
   ],
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/theYahia/hh-mcp.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theYahia/hh-mcp.git"
+  },
   "homepage": "https://github.com/theYahia/hh-mcp#readme",
   "author": "theYahia (https://github.com/theYahia)"
 }
