@@ -1,7 +1,16 @@
+import { VERSION } from "./version.js";
+
 const BASE_URL = "https://api.hh.ru";
 const TIMEOUT = 10_000;
 const MAX_RETRIES = 3;
-const USER_AGENT = "theYahia-hh-mcp/2.0 (https://github.com/theYahia/hh-mcp)";
+
+// hh.ru REQUIRES an `HH-User-Agent` header on every request (it is `required`
+// in the OpenAPI spec) and recommends including a contact address. Requests
+// without it risk being blocked or captcha-gated. The default carries the repo
+// URL as a contact channel; operators can override with their own app + contact
+// email via the HH_USER_AGENT env var (e.g. "my-app/1.0 (me@example.com)").
+const DEFAULT_USER_AGENT = `hh-mcp/${VERSION} (+https://github.com/theYahia/hh-mcp)`;
+const USER_AGENT = process.env.HH_USER_AGENT?.trim() || DEFAULT_USER_AGENT;
 
 // Rate limiter: 5 requests per second
 const RATE_LIMIT = 5;
@@ -43,6 +52,9 @@ export async function hhGet(path: string): Promise<unknown> {
     const timer = setTimeout(() => controller.abort(), TIMEOUT);
 
     const headers: Record<string, string> = {
+      // hh.ru reads the custom `HH-User-Agent`; we also send the standard
+      // `User-Agent` for proxies/CDNs that key on it.
+      "HH-User-Agent": USER_AGENT,
       "User-Agent": USER_AGENT,
       Accept: "application/json",
     };
@@ -103,11 +115,11 @@ export async function hhGet(path: string): Promise<unknown> {
       throw new HhApiError(response.status, response.statusText, body);
     } catch (error) {
       clearTimeout(timer);
-      if (
-        error instanceof DOMException &&
-        error.name === "AbortError" &&
-        attempt < MAX_RETRIES
-      ) {
+      // Abort fires as a DOMException in Node 18+, but be tolerant of runtimes
+      // that surface a plain Error named "AbortError".
+      const isAbort =
+        error instanceof Error && error.name === "AbortError";
+      if (isAbort && attempt < MAX_RETRIES) {
         console.error(
           `[hh-mcp] Timeout, retry (${attempt}/${MAX_RETRIES})`,
         );

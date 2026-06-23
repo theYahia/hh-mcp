@@ -2,7 +2,7 @@ export interface Vacancy {
   id: string;
   name: string;
   salary?: { from?: number; to?: number; currency: string; gross: boolean };
-  employer: { id: string; name: string; url: string };
+  employer: { id: string; name: string; url?: string; alternate_url?: string };
   area: { id: string; name: string };
   snippet?: { requirement?: string; responsibility?: string };
   alternate_url: string;
