@@ -8,20 +8,20 @@
 
 ![Демонстрация: вопрос «найди Python-вакансии в Москве от 250 000 ₽ на удалёнке» — агент вызывает search_vacancies и отвечает списком вакансий](https://raw.githubusercontent.com/theYahia/WWmcp/main/servers/hh/assets/demo.svg)
 
-Responses are returned as compact, LLM-friendly summaries by default — pass `raw: true` to any search/detail tool to get the full hh.ru JSON.
+По умолчанию ответы приходят компактными сводками, удобными для LLM — передайте `raw: true` любому инструменту поиска или карточки, чтобы получить полный JSON hh.ru.
 
-Part of the [WWmcp](https://github.com/theYahia/WWmcp) series by [@theYahia](https://github.com/theYahia).
+Часть серии [WWmcp](https://github.com/theYahia/WWmcp) от [@theYahia](https://github.com/theYahia).
 
-## Two Modes
+## Два режима
 
-| Mode | What's available | Token needed? |
+| Режим | Что доступно | Нужен токен? |
 |------|-----------------|:-------------:|
-| **No token** | Vacancy search, vacancy by ID, similar vacancies, employers, salary stats, areas, roles, industries, metro, dictionaries, suggests, token check | No |
-| **With token** | Everything above + resume search, resume by ID | Yes (`HH_ACCESS_TOKEN`) |
+| **Без токена** | Поиск вакансий, вакансия по ID, похожие вакансии, работодатели, статистика зарплат, регионы, роли, отрасли, метро, справочники, подсказки, проверка токена | нет |
+| **С токеном** | Всё перечисленное + поиск резюме, резюме по ID | да (`HH_ACCESS_TOKEN`) |
 
-Get a token at [dev.hh.ru/admin](https://dev.hh.ru/admin). Note: resume search additionally requires an **employer** account with a **paid resume-database subscription** — applicant/anonymous tokens get a 403. Use `validate_token` to check what your token can do.
+Токен выдаётся на [dev.hh.ru/admin](https://dev.hh.ru/admin). Важно: поиск резюме дополнительно требует аккаунт **работодателя** с **оплаченной подпиской на базу резюме** — токены соискателя и анонимные получают 403. Проверить возможности своего токена можно инструментом `validate_token`.
 
-## Installation
+## Установка
 
 ### Claude Desktop
 
@@ -43,7 +43,7 @@ Get a token at [dev.hh.ru/admin](https://dev.hh.ru/admin). Note: resume search a
 
 ```bash
 claude mcp add hh -- npx -y @theyahia/hh-mcp
-# With token:
+# С токеном:
 claude mcp add hh -e HH_ACCESS_TOKEN=your-token -- npx -y @theyahia/hh-mcp
 ```
 
@@ -73,98 +73,98 @@ claude mcp add hh -e HH_ACCESS_TOKEN=your-token -- npx -y @theyahia/hh-mcp
 }
 ```
 
-### HTTP Mode (Streamable HTTP)
+### Режим HTTP (Streamable HTTP)
 
 ```bash
 npx @theyahia/hh-mcp --http
-# or
+# или
 HTTP_PORT=8080 npx @theyahia/hh-mcp --http
 ```
 
-Endpoint: `http://localhost:3000/mcp` (POST) · Health check: `http://localhost:3000/health` (GET)
+Эндпоинт: `http://localhost:3000/mcp` (POST) · Проверка состояния: `http://localhost:3000/health` (GET)
 
-HTTP mode is stateless and binds to `127.0.0.1` by default with DNS-rebinding protection on. To expose it, set `HOST=0.0.0.0` and add your host/origin to `HH_ALLOWED_HOSTS` / `HH_ALLOWED_ORIGINS`, and put it behind your own auth.
+HTTP-режим stateless, по умолчанию слушает `127.0.0.1` с включённой защитой от DNS-rebinding. Чтобы открыть его наружу, задайте `HOST=0.0.0.0`, добавьте свой host/origin в `HH_ALLOWED_HOSTS` / `HH_ALLOWED_ORIGINS` и поставьте перед ним собственную аутентификацию.
 
-## Environment Variables
+## Переменные окружения
 
-| Variable | Required | Description |
+| Переменная | Обяз. | Описание |
 |----------|----------|-------------|
-| `HH_ACCESS_TOKEN` | No | OAuth 2.0 Bearer token. Required for resume endpoints (employer + paid resume DB). |
-| `HH_USER_AGENT` | No | Custom `HH-User-Agent` (hh.ru requires it). Recommend `your-app/1.0 (you@example.com)`. |
-| `HTTP_PORT` / `PORT` | No | Port for HTTP mode (default: 3000). |
-| `HOST` | No | Interface to bind in HTTP mode (default: `127.0.0.1`). |
-| `HH_ALLOWED_HOSTS` | No | Comma-separated Host allow-list for HTTP mode (default: loopback). |
-| `HH_ALLOWED_ORIGINS` | No | Comma-separated Origin allow-list for HTTP mode. |
+| `HH_ACCESS_TOKEN` | нет | Bearer-токен OAuth 2.0. Нужен для эндпоинтов резюме (работодатель + оплаченная база резюме). |
+| `HH_USER_AGENT` | нет | Свой `HH-User-Agent` (hh.ru его требует). Рекомендуемый формат: `your-app/1.0 (you@example.com)`. |
+| `HTTP_PORT` / `PORT` | нет | Порт HTTP-режима (по умолчанию 3000). |
+| `HOST` | нет | Интерфейс привязки в HTTP-режиме (по умолчанию `127.0.0.1`). |
+| `HH_ALLOWED_HOSTS` | нет | Список разрешённых Host через запятую для HTTP-режима (по умолчанию loopback). |
+| `HH_ALLOWED_ORIGINS` | нет | Список разрешённых Origin через запятую для HTTP-режима. |
 
-See [`.env.example`](.env.example).
+См. [`.env.example`](.env.example).
 
-## Tools (19)
+## Инструменты (19)
 
-Every search/detail tool accepts `raw: true` to return the full hh.ru JSON instead of the compact summary.
+Любой инструмент поиска или карточки принимает `raw: true` — тогда вернётся полный JSON hh.ru вместо компактной сводки.
 
-### Vacancies
+### Вакансии
 
-| Tool | Description | Token? |
+| Инструмент | Описание | Токен? |
 |------|-------------|:------:|
-| `search_vacancies` | Search by keywords, region, professional role, industry, metro, employer, salary, experience, work format / employment form, date range (`period` or `date_from`/`date_to`), labels, search field, with sorting and pagination | No |
-| `get_vacancy` | Full vacancy details: description, requirements, key skills, contacts | No |
-| `get_similar_vacancies` | Find vacancies similar to a given one | No |
+| `search_vacancies` | Поиск по ключевым словам, региону, профессиональной роли, отрасли, метро, работодателю, зарплате, опыту, формату работы и типу занятости, периоду (`period` или `date_from`/`date_to`), меткам и полю поиска, с сортировкой и пагинацией | нет |
+| `get_vacancy` | Полная карточка вакансии: описание, требования, ключевые навыки, контакты | нет |
+| `get_similar_vacancies` | Найти вакансии, похожие на заданную | нет |
 
-### Resumes (employer token + paid resume DB)
+### Резюме (токен работодателя + оплаченная база резюме)
 
-| Tool | Description | Token? |
+| Инструмент | Описание | Токен? |
 |------|-------------|:------:|
-| `search_resumes` | Search candidate resumes by keywords, region, role, salary, experience | **Yes** |
-| `get_resume` | Full resume: experience, education, skills, contacts | **Yes** |
+| `search_resumes` | Поиск резюме кандидатов по ключевым словам, региону, роли, зарплате, опыту | **да** |
+| `get_resume` | Полное резюме: опыт, образование, навыки, контакты | **да** |
 
-### Employers
+### Работодатели
 
-| Tool | Description | Token? |
+| Инструмент | Описание | Токен? |
 |------|-------------|:------:|
-| `search_employers` | Search companies by name and region | No |
-| `get_employer` | Employer profile: description, industries, website, vacancy count | No |
-| `get_employer_vacancies` | List active vacancies for a specific employer | No |
+| `search_employers` | Поиск компаний по названию и региону | нет |
+| `get_employer` | Профиль работодателя: описание, отрасли, сайт, число вакансий | нет |
+| `get_employer_vacancies` | Активные вакансии конкретного работодателя | нет |
 
-### Dictionaries & Suggests
+### Справочники и подсказки
 
-| Tool | Description | Token? |
+| Инструмент | Описание | Токен? |
 |------|-------------|:------:|
-| `get_areas` | Tree of regions and cities (`id — name`) | No |
-| `get_areas_subtree` | Regions/cities under one area id — lighter than the full tree | No |
-| `get_professional_roles` | Tree of professional roles with IDs | No |
-| `get_industries` | Tree of company industries with IDs | No |
-| `get_metro` | Metro stations/lines with IDs for a city | No |
-| `get_dictionaries` | All reference data: currencies, employment types, schedules, experience, labels | No |
-| `suggest_positions` | Autocomplete job titles | No |
-| `suggest_companies` | Autocomplete company names | No |
-| `suggest_areas` | Autocomplete region/city names | No |
+| `get_areas` | Дерево регионов и городов (`id — название`) | нет |
+| `get_areas_subtree` | Регионы и города внутри одного региона — легче, чем всё дерево | нет |
+| `get_professional_roles` | Дерево профессиональных ролей с ID | нет |
+| `get_industries` | Дерево отраслей компаний с ID | нет |
+| `get_metro` | Станции и линии метро с ID по городу | нет |
+| `get_dictionaries` | Все справочные данные: валюты, типы занятости, графики, опыт, метки | нет |
+| `suggest_positions` | Автодополнение названий должностей | нет |
+| `suggest_companies` | Автодополнение названий компаний | нет |
+| `suggest_areas` | Автодополнение названий регионов и городов | нет |
 
-### Salary & Account
+### Зарплаты и аккаунт
 
-| Tool | Description | Token? |
+| Инструмент | Описание | Токен? |
 |------|-------------|:------:|
-| `get_salary_statistics` | **Estimated** salary distribution (median, P25/P75, min/max) for a role in a region, computed from posted vacancy salaries. Biased sample, not official market data. | No |
-| `validate_token` | Check whether `HH_ACCESS_TOKEN` is valid (via `/me`) and report the account role | No |
+| `get_salary_statistics` | **Оценочное** распределение зарплат (медиана, P25/P75, мин/макс) по роли в регионе, посчитанное по зарплатам опубликованных вакансий. Выборка смещённая, это не официальные данные рынка. | нет |
+| `validate_token` | Проверить, действителен ли `HH_ACCESS_TOKEN` (через `/me`), и показать роль аккаунта | нет |
 
-## Rate Limiting
+## Ограничение частоты запросов
 
-Built-in rate limiter respects the hh.ru API limit of 5 requests per second. Automatic retry with exponential backoff on 429 and 5xx errors (up to 3 attempts). Note: the limiter is process-global, so in shared HTTP mode all clients share one 5 req/s budget.
+Встроенный лимитер соблюдает ограничение API hh.ru — 5 запросов в секунду. Автоматический повтор с экспоненциальной задержкой на ошибках 429 и 5xx (до 3 попыток). Учтите: лимитер общий на процесс, поэтому в общем HTTP-режиме все клиенты делят один бюджет 5 запросов/сек.
 
-## Demo Prompts
-
-```
-Find remote Python developer jobs in Moscow paying over 300,000 RUB
-```
+## Демо-промпты
 
 ```
-Show me all open vacancies at Yandex and give me salary statistics for their top roles
+Найди удалённые вакансии Python-разработчика в Москве от 300 000 рублей
 ```
 
 ```
-Compare Senior Backend salaries in Moscow vs Saint Petersburg, and suggest similar vacancies to the best-paying one
+Покажи все открытые вакансии Яндекса и дай статистику зарплат по основным ролям
 ```
 
-## Development
+```
+Сравни зарплаты Senior Backend в Москве и Санкт-Петербурге и предложи вакансии, похожие на самую высокооплачиваемую
+```
+
+## Разработка
 
 ```bash
 git clone https://github.com/theYahia/hh-mcp.git
@@ -174,12 +174,12 @@ npm run build
 npm test
 ```
 
-## API Reference
+## Справочник API
 
-- [hh.ru API docs](https://api.hh.ru/)
-- [hh.ru API GitHub](https://github.com/hhru/api)
+- [Документация API hh.ru](https://api.hh.ru/)
+- [API hh.ru на GitHub](https://github.com/hhru/api)
 
-## License
+## Лицензия
 
 MIT
 
