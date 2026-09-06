@@ -1,17 +1,3 @@
-> ## 🗄 Репозиторий заархивирован
->
-> Разработка переехала в **[theYahia/WWmcp](https://github.com/theYahia/WWmcp)** — монорепозиторий MCP-серверов для незападных API: СНГ, MENA, Африка, LATAM, Юго-Восточная Азия. Общее ядро `@theyahia/mcp-core`, единый CI, единый релизный конвейер.
->
-> Актуальная версия того, что лежало здесь: [`servers/hh/`](https://github.com/theYahia/WWmcp/tree/main/servers/hh)
->
-> Пакет в npm прежний — [`@theyahia/hh-mcp`](https://www.npmjs.com/package/@theyahia/hh-mcp), ставится и работает как раньше.
-> Здесь больше ничего не обновляется. Задачи и pull request'ы — в WWmcp.
->
-> **Archived — development moved to [theYahia/WWmcp](https://github.com/theYahia/WWmcp),** a monorepo of MCP servers for non-Western APIs.
-> The current version of this package now lives at [`servers/hh/`](https://github.com/theYahia/WWmcp/tree/main/servers/hh).
-> The npm package [`@theyahia/hh-mcp`](https://www.npmjs.com/package/@theyahia/hh-mcp) is unchanged.
-> Please open issues and pull requests there.
-
 # MCP-сервер для hh.ru API — 19 инструментов для ИИ-агента: вакансии, резюме, зарплаты
 
 Если вы искали, как подключить hh.ru к Claude или другому ИИ-агенту, — этот сервер даёт агенту поиск по вакансиям и резюме, карточки работодателей, статистику зарплат и справочники hh.ru по России и СНГ. Спрашиваете «найди Python-вакансии в Москве от 250 000 ₽ на удалёнке» — агент возвращает готовый список с зарплатами и опытом, а не ссылку на выдачу. Поиск вакансий работает без токена; токен нужен только для базы резюме.
